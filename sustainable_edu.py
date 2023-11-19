@@ -4,17 +4,50 @@ def introduction():
     print("The higher the level, the more points you can earn.")
     print("Type 'yes' if you think the item is recyclable, and 'no' if not.")
 
-def main_game_loop(quiz_items):
-    score = 0
-    for item in quiz_items:
-        user_guess = display_question(item)
-        correct_answer = quiz_items[item]
-        score = check_answer(user_guess, correct_answer, score)
-        give_feedback(correct_answer, item)
-    return score
+def select_level(levels): # choose different diffculty 
+    print("\nAvailable Levels:")
+    for level in levels:
+        print(level)
+    while True:
+        selected_level = input("Choose a level to play (e.g., Level 1): ").strip()
+        if selected_level in levels:
+            return selected_level
+        else:
+            print("Invalid level. Please choose a valid level.")
 
-def display_question(item):
+def main_game_loop(levels): # we modify this as we add more features to the game 
+    total_score = 0
+    while True:
+        selected_level = select_level(levels)
+        quiz_items = levels[selected_level]
+        level_number = int(selected_level.split(" ")[-1])  # Assuming level format is "Level X"
+        score_multiplier = level_number  # More points for higher levels
+
+        print(f"\nStarting {selected_level}...")
+        score = 0
+        for item in quiz_items:
+            user_guess = display_question(item)
+            correct_answer = quiz_items[item]
+            score = check_answer(user_guess, correct_answer, score, score_multiplier)
+            give_feedback(correct_answer, item)
+        total_score += score
+        print(f"You scored {score} points in {selected_level}.")
+
+        if input("\nDo you want to play another level? (yes/no): ").strip().lower() != "yes":
+            break
+
+    return total_score
+
+def display_question(item): 
     return input(f"Is a '{item}' recyclable? (yes/no): ").strip().lower()
+
+def check_answer(user_guess, correct_answer, score): 
+    if (user_guess == "yes" and correct_answer) or (user_guess == "no" and not correct_answer):
+        print("Correct!")
+        return score + 1
+    else:
+        print("Incorrect!")
+        return score
 
 def check_answer(user_guess, correct_answer, score):
     if (user_guess == "yes" and correct_answer) or (user_guess == "no" and not correct_answer):
@@ -29,22 +62,33 @@ def give_feedback(correct_answer, item):
     print(f"The correct answer for '{item}' is: {explanation}.")
     # Here you can add more detailed explanations
     print()
-    time.sleep(2)
 
 def end_game_summary(score, total_items):
     print(f"Your final score is {score} out of {total_items}.")
     print("Thank you for playing! Remember, every small step in recycling helps our planet.")
 
-# Sample quiz data
-quiz_items = {
-    "Plastic bottle": True,
-    "Styrofoam cup": False,
-    "Glass jar": True,
-    "Used pizza box with grease": False,
-    # Add more items...
+def check_answer(user_guess, correct_answer, score, score_multiplier):
+    if (user_guess == "yes" and correct_answer) or (user_guess == "no" and not correct_answer):
+        print("Correct!")
+        return score + (1 * score_multiplier)
+    else:
+        print("Incorrect!")
+        return score
+
+levels = {
+    "Level 1": {
+        "Plastic bottle": True,
+        "Styrofoam cup": False,
+    },
+    "Level 2": {
+        "Glass jar": True,
+        "Used pizza box with grease": False,
+    },
+    # Add more levels as needed
 }
 
 if __name__ == "__main__":
     introduction()
-    final_score = main_game_loop(quiz_items)
-    end_game_summary(final_score, len(quiz_items))
+    final_score = main_game_loop(levels)
+    print(f"\nYour total score is {final_score}.")
+    print("Thank you for playing! Remember, every small step in recycling helps our planet.")
